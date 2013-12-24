@@ -158,7 +158,7 @@ int main() {
     cprintf("\r\n");
     cprintf("Program length: %d\r\n", len);
 
-    compile(0x3000, 0x2000);
+    compile(0x3000, 0xc000);
 
     // Clear STOP status
     *((char*)0x0091) = 0;
