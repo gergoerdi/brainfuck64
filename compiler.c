@@ -43,37 +43,31 @@ void compile(unsigned int mem_base, unsigned int pc)
     unsigned int loops[20];
     unsigned int *loop = loops;
     unsigned int start_pc;
-    char start_lo, start_hi;
-    char end_lo, end_hi;
 
 #define emit(b) *((char*)pc++) = b;
 #define emit2(b1, b2) emit(b1); emit(b2);
-#define emit3(b1, b2, b3) emit(b1); emit(b2); emit(b3);
-
-#define unpack(x, lo, hi) { lo = *((char*)&x); hi = *((char*)&x+1); }
+#define emitW(b, w) emit(b); *((int*)pc) = w; pc += 2;
 
     int i;
-    char mem_lo, mem_hi;
-    unpack(mem_base, mem_lo, mem_hi);
 
     // Zero out memory area
-    /* emit2(0xa9, 0x17);           // LDA #$17 */
-    /* emit3(0x8d, 0x18, 0xd0);     // STA $D018 */
-    emit2(0xa9, 0x00);           // LDA #$00
-    emit2(0xa2, 0x00);           // LDX #$ff
-    emit3(0x9d, mem_lo, mem_hi); // loop: STA MEM,X
-    emit(0xca);                  // DEX
-    emit2(0xd0, 0xfa);           // BNE loop
+    /* emit2(0xa9, 0x17);     // LDA #$17 */
+    /* emitW(0x8d, 0xd018);   // STA $D018 */
+    emit2(0xa9, 0x00);     // LDA #$00
+    emit2(0xa2, 0x00);     // LDX #$00
+    emitW(0x9d, mem_base); // loop: STA MEM,X
+    emit(0xca);            // DEX
+    emit2(0xd0, 0xfa);     // BNE loop
 
     for (i = 0; i < len; ++i)
     {
         switch (src_buffer[i])
         {
         case '+':
-            emit3(0xfe, mem_lo, mem_hi); // INC MEM,X
+            emitW(0xfe, mem_base); // INC MEM,X
             break;
         case '-':
-            emit3(0xde, mem_lo, mem_hi); // DEC MEM,X
+            emitW(0xde, mem_base); // DEC MEM,X
             break;
 
         case '>':
@@ -84,26 +78,22 @@ void compile(unsigned int mem_base, unsigned int pc)
             break;
 
         case '.':
-            emit3(0xbd, mem_lo, mem_hi); // LDA MEM,X
-            emit3(0x20, 0xd2, 0xff);     // JSR $FFD2
+            emitW(0xbd, mem_base); // LDA MEM,X
+            emitW(0x20, 0xffd2);   // JSR $FFD2
             break;
 
         case '[':
             *(loop++) = pc;
-            emit3 (0xbd, mem_lo, mem_hi); // LDA MEM,X
-            emit2 (0xd0, 0x03);           // BNE +3
-            emit3 (0x4c, 0x00, 0x00);     // JMP end
+            emitW(0xbd, mem_base); // LDA MEM,X
+            emit2(0xd0, 0x03);     // BNE +3
+            emitW(0x4c, 0x0000);   // JMP end
             // end address will be filled in by handler for ']'
             break;
 
         case ']':
             start_pc = *(--loop);
-            unpack(start_pc, start_lo, start_hi);
-            emit3 (0x4c, start_lo, start_hi); // JMP start
-
-            unpack(pc, end_lo, end_hi);
-            *((char*)start_pc + 6) = end_lo;
-            *((char*)start_pc + 7) = end_hi;
+            emitW(0x4c, start_pc); // JMP start
+            *((int*)(start_pc + 6)) = pc;
             break;
         }
     }
