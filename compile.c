@@ -15,7 +15,7 @@ static void compile_bunch (char instr, char bunch_size)
     switch (instr)
     {
     case '+':
-        if (bunch_size < 4)
+        if (bunch_size < 2)
         {
             for (;bunch_size; --bunch_size)
                 emitW(0xfe, mem); // INC MEM,X
@@ -28,7 +28,7 @@ static void compile_bunch (char instr, char bunch_size)
         break;
 
     case '-':
-        if (bunch_size < 4)
+        if (bunch_size < 2)
         {
             for (;bunch_size; --bunch_size)
                 emitW(0xde, mem); // DEC MEM,X
@@ -41,7 +41,7 @@ static void compile_bunch (char instr, char bunch_size)
         break;
 
     case '>':
-        if (bunch_size < 4)
+        if (bunch_size < 5)
         {
             for (;bunch_size; --bunch_size)
                 emit(0xe8); // INX
@@ -54,7 +54,7 @@ static void compile_bunch (char instr, char bunch_size)
         break;
 
     case '<':
-        if (bunch_size < 4)
+        if (bunch_size < 5)
         {
             for (;bunch_size; --bunch_size)
                 emit(0xca); // DEX
