@@ -1,9 +1,6 @@
 #include <conio.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
-
-#include "compile.h"
 
 /* conio doesn't echo typed characters.
 ** So, this function does it.
@@ -36,15 +33,13 @@ static int gettoken(void) {
     }
 }
 
-#define src_buffer_len 1024
-char src_buffer[src_buffer_len];
-int len = 0;
-
-int main() {
+int read_source (char *src_buffer, int max_len)
+{
     unsigned char height, width;
     unsigned char row = 7;
     unsigned char col = 0;
     int c;
+    int len;
 
     clrscr();
     cursor(true);
@@ -67,7 +62,7 @@ int main() {
         }
 
         src_buffer[++len] = (char)c;
-        if (len == src_buffer_len)
+        if (len == max_len)
             break;
 
         if (++col == width)
@@ -83,13 +78,5 @@ int main() {
         }
     }
 
-    cprintf("\r\n");
-    cprintf("Program length: %d\r\n", len);
-
-    compile(src_buffer, len, 0x3000, 0xc000);
-
-    // Clear STOP status
-    *((char*)0x0091) = 0;
-
-    return EXIT_SUCCESS;
+    return len;
 }
