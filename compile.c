@@ -17,21 +17,51 @@ static void compile_bunch (char instr, char bunch_size)
     switch (instr)
     {
     case '+':
-        for (i = 0; i < bunch_size; ++i)
+        if (bunch_size == 1)
+        {
             emitW(0xfe, mem); // INC MEM,X
+        } else {
+            emitW(0xbd, mem); // LDA MEM,X
+            emit(0x18); // CLC
+            emit2(0x69, bunch_size); // ADC n
+            emitW(0x9d, mem); // STA MEM,X
+        }
         break;
+
     case '-':
-        for (i = 0; i < bunch_size; ++i)
+        if (bunch_size == 1)
+        {
             emitW(0xde, mem); // DEC MEM,X
+        } else {
+            emitW(0xbd, mem); // LDA MEM,X
+            emit(0x38); // SEC
+            emit2(0xE9, bunch_size); // SBC n
+            emitW(0x9d, mem); // STA MEM,X
+        }
         break;
 
     case '>':
-        for (i = 0; i < bunch_size; ++i)
+        if (bunch_size == 1)
+        {
             emit(0xe8); // INX
+        } else {
+            emit(0x8a); // TXA
+            emit(0x18); // CLC
+            emit2(0x69, bunch_size); // ADC n
+            emit(0xaa); // TAX
+        }
         break;
+
     case '<':
-        for (i = 0; i < bunch_size; ++i)
+        if (bunch_size == 1)
+        {
             emit(0xca); // DEX
+        } else {
+            emit(0x8a); // TXA
+            emit(0x38); // SEC
+            emit2(0xe9, bunch_size); // SBC n
+            emit(0xaa); // TAX
+        }
         break;
 
     case '.':
