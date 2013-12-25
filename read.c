@@ -39,7 +39,7 @@ int read_source (char *src_buffer, int max_len)
     unsigned char row = 7;
     unsigned char col = 0;
     int c;
-    int len;
+    int len = 0;
 
     clrscr();
     cursor(true);
@@ -61,7 +61,7 @@ int read_source (char *src_buffer, int max_len)
             row = 1;
         }
 
-        src_buffer[++len] = (char)c;
+        src_buffer[len++] = (char)c;
         if (len == max_len)
             break;
 
