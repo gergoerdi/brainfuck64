@@ -9,17 +9,16 @@ static unsigned int mem;
 
 static void compile_bunch (char instr, char bunch_size)
 {
-    int i;
-
     if (!bunch_size)
         return;
 
     switch (instr)
     {
     case '+':
-        if (bunch_size == 1)
+        if (bunch_size < 4)
         {
-            emitW(0xfe, mem); // INC MEM,X
+            for (;bunch_size; --bunch_size)
+                emitW(0xfe, mem); // INC MEM,X
         } else {
             emitW(0xbd, mem); // LDA MEM,X
             emit(0x18); // CLC
@@ -29,9 +28,10 @@ static void compile_bunch (char instr, char bunch_size)
         break;
 
     case '-':
-        if (bunch_size == 1)
+        if (bunch_size < 4)
         {
-            emitW(0xde, mem); // DEC MEM,X
+            for (;bunch_size; --bunch_size)
+                emitW(0xde, mem); // DEC MEM,X
         } else {
             emitW(0xbd, mem); // LDA MEM,X
             emit(0x38); // SEC
@@ -41,9 +41,10 @@ static void compile_bunch (char instr, char bunch_size)
         break;
 
     case '>':
-        if (bunch_size == 1)
+        if (bunch_size < 4)
         {
-            emit(0xe8); // INX
+            for (;bunch_size; --bunch_size)
+                emit(0xe8); // INX
         } else {
             emit(0x8a); // TXA
             emit(0x18); // CLC
@@ -53,9 +54,10 @@ static void compile_bunch (char instr, char bunch_size)
         break;
 
     case '<':
-        if (bunch_size == 1)
+        if (bunch_size < 4)
         {
-            emit(0xca); // DEX
+            for (;bunch_size; --bunch_size)
+                emit(0xca); // DEX
         } else {
             emit(0x8a); // TXA
             emit(0x38); // SEC
@@ -66,7 +68,7 @@ static void compile_bunch (char instr, char bunch_size)
 
     case '.':
         emitW(0xbd, mem); // LDA MEM,X
-        for (i = 0; i < bunch_size; ++i)
+        for (;bunch_size; --bunch_size)
             emitW(0x20, 0xffd2);   // JSR $FFD2
         break;
     }
