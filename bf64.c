@@ -1,7 +1,7 @@
 #include <conio.h>
 #include <stdlib.h>
 
-#include "read.h"
+#include "reader.h"
 #include "compile.h"
 
 #define src_buffer_len 1024
@@ -12,9 +12,12 @@ static char src_buffer[src_buffer_len];
 
 int main()
 {
+    char c;
     int len;
 
-    len = read_source(src_buffer, src_buffer_len);
+    reader_init ();
+    while (len < src_buffer_len && (c = reader_get ()))
+        src_buffer[len++] = c;
     cprintf("\r\n");
     cprintf("Program length: %d\r\n", len);
 
