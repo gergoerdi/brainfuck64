@@ -7,6 +7,7 @@
 #define src_buffer_len 1024
 static char src_buffer[src_buffer_len];
 
+#define mem 0x3000
 #define target 0xc000
 
 int main()
@@ -17,7 +18,9 @@ int main()
     cprintf("\r\n");
     cprintf("Program length: %d\r\n", len);
 
-    compile(src_buffer, len, 0x3000, target);
+    compile_init (mem, target);
+    compile(src_buffer, len);
+    compile_finish ();
 
     cprintf("Run with\r\nsys %u\r\n", target);
 
