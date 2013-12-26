@@ -19,7 +19,7 @@ int main()
 
     compile(src_buffer, len, 0x3000, target);
 
-    cprintf("Run with sys %u\r\n", target);
+    cprintf("Run with\r\nsys %u\r\n", target);
 
     // Clear STOP status
     *((char*)0x0091) = 0;
