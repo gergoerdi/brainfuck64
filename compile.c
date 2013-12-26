@@ -100,54 +100,48 @@ void compile_finish ()
     emit(0x60); // RTS
 }
 
-void compile (char *src_buffer, int src_len)
+void compile (char instr)
 {
     unsigned int start_pc;
-    int i;
 
-    for (i = 0; i < src_len; ++i)
+    switch (instr)
     {
-        char instr = src_buffer[i];
-
-        switch (instr)
+    case '+':
+    case '-':
+    case '>':
+    case '<':
+    case '.':
+        if (last_instr == instr && bunch_size < 255)
         {
-        case '+':
-        case '-':
-        case '>':
-        case '<':
-        case '.':
-            if (last_instr == instr && bunch_size < 255)
-            {
-                ++bunch_size;
-            }
-            else
-            {
-                compile_bunch(last_instr, bunch_size);
-                last_instr = instr;
-                bunch_size = 1;
-            }
-            break;
-        case '[':
-            compile_bunch(last_instr, bunch_size);
-            last_instr = 0;
-            bunch_size = 0;
-
-            *(loop++) = pc;
-            emitW(0xbd, mem); // LDA MEM,X
-            emit2(0xd0, 0x03);     // BNE +3
-            emitW(0x4c, 0x0000);   // JMP end
-            // end address will be filled in by handler for ']'
-            break;
-
-        case ']':
-            compile_bunch(last_instr, bunch_size);
-            last_instr = 0;
-            bunch_size = 0;
-
-            start_pc = *(--loop);
-            emitW(0x4c, start_pc); // JMP start
-            *((int*)(start_pc + 6)) = pc;
-            break;
+            ++bunch_size;
         }
+        else
+        {
+            compile_bunch(last_instr, bunch_size);
+            last_instr = instr;
+            bunch_size = 1;
+        }
+        break;
+    case '[':
+        compile_bunch(last_instr, bunch_size);
+        last_instr = 0;
+        bunch_size = 0;
+        
+        *(loop++) = pc;
+        emitW(0xbd, mem); // LDA MEM,X
+        emit2(0xd0, 0x03);     // BNE +3
+        emitW(0x4c, 0x0000);   // JMP end
+        // end address will be filled in by handler for ']'
+        break;
+        
+    case ']':
+        compile_bunch(last_instr, bunch_size);
+        last_instr = 0;
+        bunch_size = 0;
+        
+        start_pc = *(--loop);
+        emitW(0x4c, start_pc); // JMP start
+        *((int*)(start_pc + 6)) = pc;
+        break;
     }
 }
