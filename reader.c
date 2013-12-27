@@ -42,14 +42,14 @@ unsigned int read_hex (unsigned int initial)
     {
         gotox (col);
         for (i = 0; i < 4; ++i)
-            cputc (to_hex_digit (str[i]));
+            putchar (to_hex_digit (str[i]));
         gotox (col + pos);
 
         c = cgetc ();
         switch (c)
         {
         case CH_ENTER:
-            cputs ("\r\n");
+            puts ("");
             return str[0] * 16 * 16 * 16 + str[1] * 16 * 16 + str[2] * 16 + str[3];
             break;
         case CH_DEL:
