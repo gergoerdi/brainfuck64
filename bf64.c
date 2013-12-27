@@ -7,15 +7,24 @@
 int main()
 {
     char c;
-    const unsigned int max_len = 1024;
-    const unsigned int prog_origin = 0xc000;
-    const unsigned int mem_origin = 0x3000;
+    unsigned int prog_origin;
+    unsigned int mem_origin;
     unsigned int len = 0;
+
+    cprintf ("Memory start address? ");
+    mem_origin = read_hex (0x3000);
+
+    cprintf ("Program start address? ");
+    prog_origin = read_hex (0xc000);
 
     compile_init (mem_origin, prog_origin);
 
+    clrscr();
+    cprintf("Type your Brainfuck program below,\r\n"
+            "finish with RUN/STOP:\r\n\n");
+
     reader_init ();
-    while (len < max_len && (c = reader_get ()))
+    while (c = reader_get ())
     {
         compile (c);
         ++len;
@@ -24,7 +33,7 @@ int main()
     cprintf("Program length: %d\r\n", len);
 
     compile_finish ();
-    
+
     cprintf("Run with\r\nsys %u\r\n", prog_origin);
 
     // Clear STOP status

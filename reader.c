@@ -3,22 +3,80 @@
 #include <conio.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <ctype.h>
 
-/* conio doesn't echo typed characters.
-** So, this function does it.
-*/
-static int gettoken(void) {
-    int c;
+char to_hex_digit (char x)
+{
+    return (x <= 9) ? '0' + x : 'a' + (x - 10);
+}
+
+char from_hex_digit (char c)
+{
+    return
+        ('0' <= c && c <= '9') ? c - '0' :
+        ('a' <= c && c <= 'f') ? c - 'a' + 10 :
+        ('A' <= c && c <= 'F') ? c - 'A' + 10 :
+        -1;
+}
+
+unsigned int read_hex (unsigned int initial)
+{
+    char initial_lo = *(char*)&initial;
+    char initial_hi = *((char*)&initial + 1);
+    char c, x;
+    int pos = 0;
+
+
+    char str[4];
+    int col = wherex();
+    int i;
+
+    str[0] = initial_hi >> 4;
+    str[1] = initial_hi & 0x0f;
+    str[2] = initial_lo >> 4;
+    str[3] = initial_lo & 0x0f;
+
+    cursor(true);
+
     for (;;)
     {
-        c = (int)cgetc();
-        if (c == 0x03) // STOP
+        gotox (col);
+        for (i = 0; i < 4; ++i)
+            cputc (to_hex_digit (str[i]));
+        gotox (col + pos);
+
+        c = cgetc ();
+        switch (c)
         {
-            return EOF;
+        case CH_ENTER:
+            cputs ("\r\n");
+            return str[0] * 16 * 16 * 16 + str[1] * 16 * 16 + str[2] * 16 + str[3];
+            break;
+        case CH_DEL:
+            if (pos > 0) --pos;
+            break;
+        default:
+            x = from_hex_digit (c);
+            if (x != (char)-1)
+            {
+                str[pos] = x;
+                if (pos < 3) ++pos;
+            }
         }
+    }
+}
+
+static char gettoken()
+{
+    char c;
+    for (;;)
+    {
+        c = cgetc();
 
         switch (c)
         {
+        case CH_STOP:
+            return 0;
         case '<':
         case '>':
         case '+':
@@ -26,33 +84,31 @@ static int gettoken(void) {
         case '[':
         case ']':
         case '.':
-            cputc(c);
-            return c;
+        case ' ':
         case '\n':
-            cputc(c);
+            cputc((int)c);
             return c;
         }
     }
 }
 
 static unsigned char height, width;
-static unsigned char row = 4;
-static unsigned char col = 0;
+static unsigned char row;
+static unsigned char col;
 
 void reader_init ()
 {
-    clrscr();
-    cursor(true);
     screensize(&width, &height);
+    col = wherex();
+    row = wherey();
 
-    cprintf("Type your Brainfuck program below,\r\n"
-            "finish with RUN/STOP:\r\n\n");
+    cursor(true);
 }
 
 char reader_get ()
 {
-    int c = gettoken ();
-    if (c == EOF)
+    char c = gettoken ();
+    if (!c)
         return 0;
 
     if (row == height)
