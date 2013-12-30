@@ -8,8 +8,9 @@
 #include "menu.h"
 #include "reader.h"
 #include "compile.h"
+#include "transpile.h"
 
-void bf_input()
+static void bf_input(bool transpile_mode)
 {
     char c;
     unsigned int len = 0;
@@ -21,14 +22,14 @@ void bf_input()
     reader_init ();
     while (c = reader_get ())
     {
-        compile (c);
+        transpile_mode ? transpile (c) : compile (c);
         ++len;
     }
     printf("\r\n");
     printf("Program length: %d\r\n", len);
 }
 
-void bf_file(const char *filename, bool show)
+static void bf_file(bool transpile_mode, const char *filename, bool show)
 {
     int c;
     FILE *f;
@@ -37,25 +38,25 @@ void bf_file(const char *filename, bool show)
     if (show)
         clrscr();
 
-    printf("Loading from %s\r\n\r\n", filename);
+    printf("Loading from %s\n\n", filename);
 
     f = fopen (filename, "r");
     while ((c = fgetc(f)) != EOF)
     {
         if (show)
             putchar(c);
-        compile (c);
+        transpile_mode ? transpile (c) : compile(c);
         ++len;
     }
     fclose (f);
 
     if (show)
-        printf("\r\n");
+        printf("\n");
 
-    printf("\r\nProgram source length: %d\r\n", len);
+    printf("\nProgram source length: %d\n", len);
 }
 
-void bf_compile (const char *filename)
+static void bf_compile (const char *filename)
 {
     unsigned int prog_origin;
     unsigned int mem_origin;
@@ -68,19 +69,45 @@ void bf_compile (const char *filename)
 
     compile_init (mem_origin, prog_origin);
     if (filename)
-        bf_file (filename, true);
+        bf_file (false, filename, true);
     else
-        bf_input ();
+        bf_input (false);
     compile_finish ();
-    printf("Run with\r\nsys %u\r\n", prog_origin);
+    printf("Run with\nsys %u\n", prog_origin);
+}
+
+static void bf_transpile (const char *filename)
+{
+    unsigned int prog_origin, prog_end;
+
+    printf ("Program start address? ");
+    prog_origin = read_hex (0xc000);
+
+    transpile_init (prog_origin);
+    if (filename)
+        bf_file (true, filename, true);
+    else
+        bf_input (true);
+    prog_end = transpile_finish ();
+
+    *((unsigned int*)0x002b) = prog_origin+1;
+    *((unsigned int*)0x002d) = prog_end+1;
+    *((unsigned int*)0x002f) = prog_end+1;
+    *((unsigned int*)0x0031) = prog_end+1;
+    *((unsigned int*)0x0037) = prog_origin + 0x1000;
 }
 
 int main()
 {
-    clrscr();
-    cprintf ("Brainfuck 64\r\n(C) 2013 Gergo Erdi\r\nhttp://gergo.erdi.hu/\r\n\r\n\r\n");
+    char *filename;
+    bool transpile;
 
-    bf_compile (main_menu ());
+    clrscr();
+    printf ("Brainfuck 64\n(C) 2013 Gergo Erdi\nhttp://gergo.erdi.hu/\n\n\n");
+
+    filename = main_menu ();
+    transpile = mode_menu () == 'B';
+    transpile ? bf_transpile(filename) : bf_compile(filename);
 
     // Clear STOP status
     *((char*)0x0091) = 0;

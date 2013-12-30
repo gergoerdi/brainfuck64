@@ -10,11 +10,34 @@
 
 static char filename[17];
 
+#define MENU(s) { revers(true); putchar(s[0]); revers(false); printf(s+1); }
+
+char mode_menu ()
+{
+    bool valid = false;
+    char c;
+    cursor(true);
+
+    MENU("Machine Code / ");
+    MENU("BASIC ?");
+    valid = false;
+
+    for (;;)
+    {
+        c = toupper (cgetc ());
+        switch (c)
+        {
+        case 'M':
+        case 'B':
+            printf ("%c\n\n", c);
+            return c;
+        }
+    }
+}
+
 char * main_menu ()
 {
     bool valid;
-
-#define MENU(s) { revers(true); putchar(s[0]); revers(false); printf(s+1); }
 
     cursor(true);
     for (;;)
