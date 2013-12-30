@@ -1,9 +1,10 @@
-Brainfuck compiler for the Commodore 64
-=======================================
+Brainfuck compiler and BASIC transpiler for the Commodore 64
+============================================================
 
-This compiler runs on the Commodore 64 and emits C64 machine code
-directly. The memory region to use as the Brainfuck memory and also as
-the location of the resulting program is configurable.
+This compiler runs on the Commodore 64 and emits either C64 machine
+code directly, or C64 BASIC. The memory region to use as the Brainfuck
+memory and also as the location of the resulting program is
+configurable.
 
 
 Limitations
