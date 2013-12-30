@@ -3,7 +3,7 @@ ASM_SRCS	= $(wlidcard *.s)
 OBJS		= $(patsubst %.c, %.o, $(C_SRCS)) $(patsubst %.s, %.o, $(ASM_SRC))
 PRG		= bf64.prg
 DISK		= bf64.d64
-SAMPLES		= hello helloc slow
+SAMPLES		= hello helloc slow 9digits
 SAMPLE_BFS	= $(patsubst %, samples/%.bf, $(SAMPLES))
 
 all: $(DISK)

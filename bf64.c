@@ -65,7 +65,7 @@ static void bf_compile (const char *filename)
     mem_origin = read_hex (0x3000);
 
     printf ("Program start address? ");
-    prog_origin = read_hex (0xc000);
+    prog_origin = read_hex (0x5000);
 
     compile_init (mem_origin, prog_origin);
     if (filename)
