@@ -1,6 +1,5 @@
 C_SRCS		= $(wildcard *.c)
-ASM_SRCS	= $(wlidcard *.s)
-OBJS		= $(patsubst %.c, %.o, $(C_SRCS)) $(patsubst %.s, %.o, $(ASM_SRC))
+OBJS		= $(patsubst %.c, %.o, $(C_SRCS))
 PRG		= bf64.prg
 DISK		= bf64.d64
 SAMPLES		= hello helloc slow 9digits
@@ -23,3 +22,4 @@ clean:
 
 %.prg: $(OBJS)
 	cl65 -t c64 $^ -o $@
+	
